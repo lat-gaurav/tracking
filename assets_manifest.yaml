@@ -1,0 +1,92 @@
+# assets_manifest.yaml
+# ---------------------
+# Single source of truth for all downloadable assets.
+# Run  `python setup_assets.py`  to fetch everything after cloning.
+#
+# Sections
+# --------
+#   videos        – downloaded with yt-dlp (YouTube / Pexels)
+#   pysot_weights – SiamRPN model weights from Google Drive (via gdown)
+#   ultralytics   – YOLO .pt files auto-downloaded by ultralytics on first use
+#   custom_models – user-trained weights that must be obtained manually
+
+# ── Test videos ───────────────────────────────────────────────────────────────
+videos:
+
+  # Nadir / near-nadir drone footage (YouTube, via yt-dlp)
+  - dest: video_test/nadir_crossroads.mp4
+    url:  "https://www.youtube.com/watch?v=rnYoFBHSFpM"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_pedestrians_cars.mp4
+    url:  "https://www.youtube.com/watch?v=cGRMAbFPTCA"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_crosswalk_ped.mp4
+    url:  "https://www.youtube.com/watch?v=u_CzGhCKEKQ"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_ped_crossing.mp4
+    url:  "https://www.youtube.com/watch?v=FUSTALvlrRc"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_city_rushhour.mp4
+    url:  "https://www.youtube.com/watch?v=wqLXEP7FS8M"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_pulitzer_crossroads.mp4
+    url:  "https://www.youtube.com/watch?v=4kLMRBP_D4E"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_ped_scramble.mp4
+    url:  "https://www.youtube.com/watch?v=PkD3CIjy9wo"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_crowd_street.mp4
+    url:  "https://www.youtube.com/watch?v=t0_YMCGqd3U"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/nadir_drone_traffic.mp4
+    url:  "https://www.youtube.com/watch?v=MNn9qKG2UFI"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  - dest: video_test/street_tracking.mp4
+    url:  "https://www.youtube.com/watch?v=aHPk0F7TSME"
+    yt_opts: ["--format", "bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]", "--merge-output-format", "mp4"]
+
+  # Pexels stock clips (direct download)
+  - dest: video_test/4062991-uhd_3840_2160_30fps.mp4
+    url:  "https://www.pexels.com/video/4062991/download/"
+    direct: true
+
+  - dest: video_test/5607783-uhd_3840_2160_30fps.mp4
+    url:  "https://www.pexels.com/video/5607783/download/"
+    direct: true
+
+# ── pysot SiamRPN weights (Google Drive) ──────────────────────────────────────
+pysot_weights:
+
+  - dest:    siamese/pysot/experiments/siamrpn_alex_dwxcorr/model/model.pth
+    gdrive:  "1t62x56Jl7baUzPTo0QrC4jJnwvPZm-2m"
+    note:    "AlexNet-backbone SiamRPN (lighter, faster)"
+
+  - dest:    siamese/pysot/experiments/siamrpn_r50_l234_dwxcorr/model/model.pth
+    gdrive:  "1Q4-1563iPwV6wSf_lBHDj5CPFiGSlEPG"
+    note:    "ResNet-50 SiamRPN (better quality, recommended)"
+
+# ── Ultralytics YOLO models (auto-downloaded on first YOLO() call) ─────────────
+# These are listed here for documentation only; setup_assets.py will warm-download them.
+ultralytics:
+  - filename: yolov8n.pt
+    note: "General-purpose detector (fast)"
+  - filename: yolov8l-seg.pt
+    note: "Instance segmentation for anchor masking"
+  - filename: yolov8s-seg.pt
+    note: "Lighter seg model alternative"
+
+# ── Custom / private model weights (manual download required) ─────────────────
+custom_models:
+  - dest:  models/yolov26nobbnew_merged_1024.pt
+    note:  "Custom YOLO trained model. Contact repo owner for weights."
+  - dest:  models/yolon26obb-newmerged-imgsz640-epochs75.pt
+    note:  "Custom OBB YOLO model. Contact repo owner for weights."

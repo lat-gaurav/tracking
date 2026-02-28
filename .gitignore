@@ -1,0 +1,52 @@
+# ── Videos ────────────────────────────────────────────────────────────────────
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.yuy2
+
+# ── Model weights / engines ────────────────────────────────────────────────────
+*.pt
+*.pth
+*.engine
+*.onnx
+*.trt
+*.wts
+
+# ── Snapshots / output images ─────────────────────────────────────────────────
+snap_*.png
+*.jpg
+*.jpeg
+*.png
+
+# ── Python runtime ────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environment ───────────────────────────────────────────────────────
+tracking/
+.venv/
+venv/
+env/
+
+# ── Logs / misc ───────────────────────────────────────────────────────────────
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# ── pysot compiled extensions (Cython) ────────────────────────────────────────
+siamese/pysot/pysot/utils/region_py/*.c
+siamese/pysot/pysot/utils/region_py/*.so
+
+# ── Keep directory structure but not contents ─────────────────────────────────
+# (these are recreated by setup_assets.py)
+video_test/.gitkeep
+models/.gitkeep
+siamese/pysot/experiments/siamrpn_alex_dwxcorr/model/.gitkeep
+siamese/pysot/experiments/siamrpn_r50_l234_dwxcorr/model/.gitkeep
+models/reid/.gitkeep
