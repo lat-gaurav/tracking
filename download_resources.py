@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# https://drive.google.com/file/d/1ujck7cSZuS5uPURZP7jhI0mxXCyEvjkt/view?usp=sharing
 """
 download_resources.py
 =====================
@@ -13,9 +14,20 @@ Requirements
 ------------
     pip install gdown tqdm
 """
+import os
 import sys
 import zipfile
 from pathlib import Path
+
+# ── Ensure the repo venv site-packages is on sys.path ─────────────────────────
+_ROOT_EARLY = Path(__file__).resolve().parent
+_VENV_SITE  = _ROOT_EARLY / "tracking" / "lib"
+if _VENV_SITE.exists():
+    for _sp in sorted(_VENV_SITE.rglob("site-packages"), key=lambda p: len(p.parts)):
+        if str(_sp) not in sys.path:
+            sys.path.insert(0, str(_sp))
+        break  # only the first (shallowest) match
+# ─────────────────────────────────────────────────────────────────────────────
 
 # ── Config ────────────────────────────────────────────────────────────────────
 # Share the zip on Google Drive with "Anyone with the link can view",
@@ -24,7 +36,7 @@ from pathlib import Path
 # Share URL looks like:
 #   https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing
 #                                    ^^^^^^^^
-GDRIVE_FILE_ID = "PASTE_YOUR_GDRIVE_FILE_ID_HERE"
+GDRIVE_FILE_ID = "1ujck7cSZuS5uPURZP7jhI0mxXCyEvjkt"
 
 ROOT     = Path(__file__).resolve().parent
 ZIP_DEST = ROOT / "resources.zip"
@@ -36,9 +48,18 @@ def _ensure_gdown():
         import gdown
         return gdown
     except ImportError:
-        print("  gdown not found – installing …")
-        import subprocess
-        subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "gdown"], check=True)
+        print("  gdown not found – installing into venv …")
+        import subprocess, importlib, site
+        venv_pip = ROOT / "tracking" / "bin" / "pip"
+        pip_exe  = str(venv_pip) if venv_pip.exists() else sys.executable
+        cmd = [pip_exe, "install", "--quiet", "gdown"] if venv_pip.exists() \
+              else [sys.executable, "-m", "pip", "install", "--quiet", "gdown"]
+        subprocess.run(cmd, check=True)
+        # make the freshly installed package visible in this process
+        importlib.invalidate_caches()
+        for sp in site.getsitepackages():
+            if sp not in sys.path:
+                sys.path.insert(0, sp)
         import gdown
         return gdown
 
@@ -60,7 +81,7 @@ def main():
 
     gdown = _ensure_gdown()
 
-    url = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
+    url = f"https://drive.google.com/file/d/{GDRIVE_FILE_ID}/view?usp=sharing"
     try:
         gdown.download(url, str(ZIP_DEST), quiet=False, fuzzy=True)
     except Exception as e:
