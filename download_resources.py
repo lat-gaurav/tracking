@@ -14,20 +14,9 @@ Requirements
 ------------
     pip install gdown tqdm
 """
-import os
 import sys
 import zipfile
 from pathlib import Path
-
-# ── Ensure the repo venv site-packages is on sys.path ─────────────────────────
-_ROOT_EARLY = Path(__file__).resolve().parent
-_VENV_SITE  = _ROOT_EARLY / "tracking" / "lib"
-if _VENV_SITE.exists():
-    for _sp in sorted(_VENV_SITE.rglob("site-packages"), key=lambda p: len(p.parts)):
-        if str(_sp) not in sys.path:
-            sys.path.insert(0, str(_sp))
-        break  # only the first (shallowest) match
-# ─────────────────────────────────────────────────────────────────────────────
 
 # ── Config ────────────────────────────────────────────────────────────────────
 # Share the zip on Google Drive with "Anyone with the link can view",
@@ -48,20 +37,39 @@ def _ensure_gdown():
         import gdown
         return gdown
     except ImportError:
-        print("  gdown not found – installing into venv …")
-        import subprocess, importlib, site
-        venv_pip = ROOT / "tracking" / "bin" / "pip"
-        pip_exe  = str(venv_pip) if venv_pip.exists() else sys.executable
-        cmd = [pip_exe, "install", "--quiet", "gdown"] if venv_pip.exists() \
-              else [sys.executable, "-m", "pip", "install", "--quiet", "gdown"]
-        subprocess.run(cmd, check=True)
-        # make the freshly installed package visible in this process
-        importlib.invalidate_caches()
-        for sp in site.getsitepackages():
-            if sp not in sys.path:
-                sys.path.insert(0, sp)
-        import gdown
-        return gdown
+        pass
+
+    print("  gdown not found – attempting install …")
+    import subprocess, importlib, site
+
+    # Try install strategies in order until one works
+    strategies = [
+        [sys.executable, "-m", "pip", "install", "--quiet", "--user", "gdown"],
+        [sys.executable, "-m", "pip", "install", "--quiet", "--user",
+         "--break-system-packages", "gdown"],   # Homebrew / externally-managed Python
+        [sys.executable, "-m", "pip", "install", "--quiet", "gdown"],
+    ]
+    installed = False
+    for cmd in strategies:
+        result = subprocess.run(cmd, capture_output=True)
+        if result.returncode == 0:
+            installed = True
+            break
+
+    if not installed:
+        print("\nERROR: could not auto-install gdown.")
+        print("  Please install it manually, then re-run:")
+        print("    pip install gdown          # inside your active venv/conda")
+        print("    pipx install gdown         # if you use pipx")
+        sys.exit(1)
+
+    # make the freshly-installed package visible without restarting
+    importlib.invalidate_caches()
+    for sp in [site.getusersitepackages()] + site.getsitepackages():
+        if sp not in sys.path:
+            sys.path.insert(0, sp)
+    import gdown
+    return gdown
 
 
 def main():
