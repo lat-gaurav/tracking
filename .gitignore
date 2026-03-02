@@ -40,6 +40,11 @@ env/
 .vscode/
 *.swp
 
+# ── Google Drive upload credentials (never commit these) ──────────────────────
+credentials.json
+token.json
+resources.zip
+
 # ── pysot compiled extensions (Cython) ────────────────────────────────────────
 siamese/pysot/pysot/utils/region_py/*.c
 siamese/pysot/pysot/utils/region_py/*.so
