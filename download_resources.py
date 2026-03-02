@@ -1,34 +1,55 @@
 #!/usr/bin/env python3
-# https://drive.google.com/file/d/1ujck7cSZuS5uPURZP7jhI0mxXCyEvjkt/view?usp=sharing
 """
 download_resources.py
 =====================
-Downloads the complete resources/ folder (videos, model weights, recordings)
-from a shared Google Drive zip archive.
+Downloads all resources needed for this project:
 
-Usage (after cloning)
----------------------
-    python download_resources.py
+  1. resources.zip  – model weights + small test videos (Google Drive)
+  2. VisDrone-MOT   – Task 4 multi-object tracking dataset  (~11 GB, Google Drive)
+  3. DroneCrowd     – crowd counting + tracking dataset     (~10 GB, Google Drive)
+
+Dataset references
+------------------
+  VisDrone  : https://github.com/VisDrone/VisDrone-Dataset
+  DroneCrowd: https://github.com/VisDrone/DroneCrowd
+  M3OT      : must be requested from authors (not auto-downloaded)
+
+Usage
+-----
+    python download_resources.py                 # everything
+    python download_resources.py --skip-datasets # weights/videos only
+    python download_resources.py --only visdrone-mot
+    python download_resources.py --only dronecrowd
 
 Requirements
 ------------
-    pip install gdown tqdm
+    pip install gdown
 """
+import argparse
+import subprocess
 import sys
 import zipfile
+import importlib
+import site
 from pathlib import Path
 
-# ── Config ────────────────────────────────────────────────────────────────────
-# Share the zip on Google Drive with "Anyone with the link can view",
-# then paste the file ID here (the long string in the share URL).
-#
-# Share URL looks like:
-#   https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing
-#                                    ^^^^^^^^
-GDRIVE_FILE_ID = "1ujck7cSZuS5uPURZP7jhI0mxXCyEvjkt"
+ROOT = Path(__file__).resolve().parent
 
-ROOT     = Path(__file__).resolve().parent
-ZIP_DEST = ROOT / "resources.zip"
+# ── Google Drive file IDs ─────────────────────────────────────────────────────
+RESOURCES_ZIP_ID = "1ujck7cSZuS5uPURZP7jhI0mxXCyEvjkt"   # weights + test videos
+
+VISDRONE_MOT = [
+    ("VisDrone-MOT train (7.5 GB)",    "1-qX2d-P1Xr64ke6nTdlm33om1VxCUTSh", "resources/visdrone_mot/VisDrone2019-MOT-train.zip"),
+    ("VisDrone-MOT val (1.5 GB)",      "1rqnKe9IgU_crMaxRoel9_nuUsMEBBVQu",  "resources/visdrone_mot/VisDrone2019-MOT-val.zip"),
+    ("VisDrone-MOT test-dev (2.1 GB)", "14z8Acxopj1d86-qhsF1NwS4Bv3KYa4Wu", "resources/visdrone_mot/VisDrone2019-MOT-test-dev.zip"),
+]
+
+DRONECROWD = [
+    ("DroneCrowd train (7.7 GB)",  "1HY3V4QObrVjzXUxL_J86oxn2bi7FMUgd",  "resources/dronecrowd/train_data-001.zip"),
+    ("DroneCrowd test (2.6 GB)",   "1HY3V4QObrVjzXUxL_J86oxn2bi7FMUgd",  "resources/dronecrowd/test_data-002.zip"),
+    # Note: DroneCrowd is officially distributed via Google Drive share link
+    # from https://github.com/VisDrone/DroneCrowd — update IDs if stale.
+]
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -40,30 +61,20 @@ def _ensure_gdown():
         pass
 
     print("  gdown not found – attempting install …")
-    import subprocess, importlib, site
-
-    # Try install strategies in order until one works
     strategies = [
         [sys.executable, "-m", "pip", "install", "--quiet", "--user", "gdown"],
         [sys.executable, "-m", "pip", "install", "--quiet", "--user",
-         "--break-system-packages", "gdown"],   # Homebrew / externally-managed Python
+         "--break-system-packages", "gdown"],
         [sys.executable, "-m", "pip", "install", "--quiet", "gdown"],
     ]
-    installed = False
     for cmd in strategies:
-        result = subprocess.run(cmd, capture_output=True)
-        if result.returncode == 0:
-            installed = True
+        if subprocess.run(cmd, capture_output=True).returncode == 0:
             break
-
-    if not installed:
+    else:
         print("\nERROR: could not auto-install gdown.")
-        print("  Please install it manually, then re-run:")
-        print("    pip install gdown          # inside your active venv/conda")
-        print("    pipx install gdown         # if you use pipx")
+        print("  pip install gdown")
         sys.exit(1)
 
-    # make the freshly-installed package visible without restarting
     importlib.invalidate_caches()
     for sp in [site.getusersitepackages()] + site.getsitepackages():
         if sp not in sys.path:
@@ -72,47 +83,95 @@ def _ensure_gdown():
     return gdown
 
 
-def main():
-    if GDRIVE_FILE_ID == "PASTE_YOUR_GDRIVE_FILE_ID_HERE":
-        print("ERROR: set GDRIVE_FILE_ID in download_resources.py before running.")
-        print("  1. Upload resources.zip to Google Drive")
-        print("  2. Right-click → Share → Anyone with the link")
-        print("  3. Copy the file ID from the share URL")
-        print("  4. Paste it into GDRIVE_FILE_ID at the top of this file")
-        sys.exit(1)
+def _gdrive_download(gdown, file_id: str, dest: Path, label: str):
+    """Download a single Google Drive file if not already present."""
+    if dest.exists():
+        print(f"  [skip] {label} – already downloaded ({dest.name})")
+        return
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    print(f"\n  Downloading {label} …")
+    url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
+    try:
+        gdown.download(url, str(dest), quiet=False, fuzzy=True)
+    except Exception as e:
+        print(f"  ERROR: {e}")
+        return
+    if not dest.exists():
+        print(f"  ERROR: {dest.name} missing after download.")
 
-    print("=" * 56)
-    print("  Downloading resources.zip from Google Drive …")
-    print(f"  File ID : {GDRIVE_FILE_ID}")
-    print(f"  Dest    : {ZIP_DEST}")
-    print("=" * 56)
+
+def _extract_zip(zip_path: Path, extract_to: Path, remove_after=False):
+    """Extract a zip if the expected directory doesn't exist yet."""
+    if not zip_path.exists():
+        print(f"  [skip extract] {zip_path.name} not found")
+        return
+    print(f"  Extracting {zip_path.name} → {extract_to} …", end=" ", flush=True)
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(extract_to)
+    print("done")
+    if remove_after:
+        zip_path.unlink()
+        print(f"  Removed {zip_path.name}")
+
+
+def download_resources_zip(gdown):
+    zip_dest = ROOT / "resources.zip"
+    _gdrive_download(gdown, RESOURCES_ZIP_ID, zip_dest, "resources.zip (weights + test videos)")
+    if zip_dest.exists():
+        _extract_zip(zip_dest, ROOT, remove_after=True)
+
+
+def download_visdrone_mot(gdown):
+    print("\n── VisDrone-MOT ──────────────────────────────────────")
+    for label, fid, rel_dest in VISDRONE_MOT:
+        dest = ROOT / rel_dest
+        _gdrive_download(gdown, fid, dest, label)
+        # Extract alongside the zip
+        split_name = dest.stem.replace("VisDrone2019-MOT-", "")
+        extracted  = dest.parent / f"VisDrone2019-MOT-{split_name}"
+        if dest.exists() and not extracted.exists():
+            _extract_zip(dest, dest.parent)
+
+
+def download_dronecrowd(gdown):
+    print("\n── DroneCrowd ────────────────────────────────────────")
+    for label, fid, rel_dest in DRONECROWD:
+        dest = ROOT / rel_dest
+        _gdrive_download(gdown, fid, dest, label)
+        split_dir = dest.parent / dest.stem.split("-")[0]  # train_data / test_data
+        if dest.exists() and not split_dir.exists():
+            _extract_zip(dest, dest.parent)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Download project resources")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--skip-datasets", action="store_true",
+                       help="Download weights/videos only, skip large datasets")
+    group.add_argument("--only", choices=["visdrone-mot", "dronecrowd"],
+                       help="Download only the specified dataset")
+    args = parser.parse_args()
 
     gdown = _ensure_gdown()
 
-    url = f"https://drive.google.com/file/d/{GDRIVE_FILE_ID}/view?usp=sharing"
-    try:
-        gdown.download(url, str(ZIP_DEST), quiet=False, fuzzy=True)
-    except Exception as e:
-        print(f"\nERROR: download failed: {e}")
-        print("  Make sure the file is shared as 'Anyone with the link can view'.")
-        sys.exit(1)
+    print("=" * 56)
+    print("  Downloading project resources")
+    print("=" * 56)
 
-    if not ZIP_DEST.exists():
-        print("ERROR: zip not downloaded (gdown returned no error but file is missing).")
-        sys.exit(1)
-
-    print(f"\n  Extracting to {ROOT} …")
-    with zipfile.ZipFile(ZIP_DEST, "r") as zf:
-        members = zf.namelist()
-        print(f"  {len(members)} entries …", end=" ", flush=True)
-        zf.extractall(ROOT)
-    print("done")
-
-    ZIP_DEST.unlink()
-    print("  Cleaned up resources.zip")
+    if args.only == "visdrone-mot":
+        download_visdrone_mot(gdown)
+    elif args.only == "dronecrowd":
+        download_dronecrowd(gdown)
+    else:
+        download_resources_zip(gdown)
+        if not args.skip_datasets:
+            download_visdrone_mot(gdown)
+            download_dronecrowd(gdown)
+            print("\n  Note: M3OT dataset must be requested from authors.")
+            print("  See https://github.com/VisDrone/M3OT for access instructions.")
 
     print("\n" + "=" * 56)
-    print("  resources/ is ready.")
+    print("  Done.")
     print("=" * 56)
 
 
