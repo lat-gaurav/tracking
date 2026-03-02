@@ -79,10 +79,11 @@ torch.set_num_threads(1)
 # ── paths / constants ─────────────────────────────────────────────────────────
 _HERE        = Path(__file__).resolve().parent
 _EXPERIMENTS = _PYSOT_ROOT / "experiments"
-DEFAULT_VIDEO  = str(_HERE.parent / "video_test" / "nadir_ped_crossing_crop640.mp4")
+_WEIGHTS_ROOT  = _HERE.parent / "resources" / "weights"
+DEFAULT_VIDEO  = str(_HERE.parent / "resources" / "video_test" / "nadir_ped_crossing_crop640.mp4")
 DEFAULT_CONFIG = "siamrpn_r50_l234_dwxcorr"
-DEFAULT_SEG    = "yolov8n-seg.pt"          # auto-downloaded by ultralytics if absent
-DEFAULT_YOLO   = str(_HERE.parent / "models" / "yolov26nobbnew_merged_1024.pt")
+DEFAULT_SEG    = str(_HERE.parent / "resources" / "models" / "yolov8n-seg.pt")
+DEFAULT_YOLO   = str(_HERE.parent / "resources" / "models" / "yolov26nobbnew_merged_1024.pt")
 DEFAULT_DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 PERSON_CLASS   = 0                         # COCO class id for 'person'
 
@@ -428,7 +429,7 @@ def load_siam(config_name, weights_path):
               file=sys.stderr)
         sys.exit(1)
     if not weights_path:
-        weights_path = str(_EXPERIMENTS / config_name / "model" / "model.pth")
+        weights_path = str(_WEIGHTS_ROOT / config_name / "model" / "model.pth")
     if not Path(weights_path).exists():
         print(f"""
 ERROR: SiamRPN weights not found at:
@@ -529,7 +530,7 @@ def parse_args():
         description="Segmentation-anchored dual-template SiamRPN tracker",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    p.add_argument("--video",   default=DEFAULT_VIDEO)
+    p.add_argument("--source", "--video", dest="source", default=DEFAULT_VIDEO)
     p.add_argument("--config",  default=DEFAULT_CONFIG,
                    help="pysot experiment config name")
     p.add_argument("--weights", default="",
@@ -589,7 +590,7 @@ def main():
     args = parse_args()
 
     # ── open video ────────────────────────────────────────────────────────────
-    raw = args.video.strip()
+    raw = args.source.strip() if isinstance(args.source, str) else str(args.source)
     if raw.lstrip("-").isdigit():
         cap = cv2.VideoCapture(int(raw))
         n_frames, is_live, src_label = 0, True, f"webcam {raw}"

@@ -162,23 +162,32 @@ def warmdown_ultralytics(entries, force=False):
         return
 
     for entry in entries:
-        fname = entry["filename"]
-        dest  = ROOT / fname
+        fpath = entry["filename"]          # e.g. resources/models/yolov8n.pt
+        fname = Path(fpath).name           # yolov8n.pt  (what ultralytics knows)
+        dest  = ROOT / fpath
+        dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists() and not force:
-            print(f"  [skip] {fname}  ({_sizeof_mb(dest):.1f} MB already on disk)")
+            print(f"  [skip] {fpath}  ({_sizeof_mb(dest):.1f} MB already on disk)")
             continue
-        print(f"\n  → {fname}  ({entry.get('note', '')})")
+        print(f"\n  → {fpath}  ({entry.get('note', '')})")
         try:
-            YOLO(fname)   # downloads to CWD / ultralytics cache then copies
-            # Also copy to repo root if not already there
-            import shutil, os
-            cache = Path.home() / ".cache" / "ultralytics" / "weights" / fname
-            if not dest.exists() and cache.exists():
-                shutil.copy(cache, dest)
+            YOLO(fname)   # auto-downloads by short name to ultralytics cache / CWD
+            import shutil
+            # candidate locations ultralytics may have saved to
+            candidates = [
+                Path(fname),                                                      # CWD
+                Path.home() / ".cache" / "ultralytics" / "weights" / fname,      # cache
+                Path.home() / ".config" / "Ultralytics" / fname,
+            ]
+            if not dest.exists():
+                for c in candidates:
+                    if c.exists():
+                        shutil.copy(c, dest)
+                        break
             if dest.exists():
-                print(f"    ✓  {fname}  ({_sizeof_mb(dest):.1f} MB)")
+                print(f"    ✓  {fpath}  ({_sizeof_mb(dest):.1f} MB)")
             else:
-                print(f"    ✓  {fname} downloaded to ultralytics cache")
+                print(f"    ✓  {fname} downloaded to ultralytics cache (not copied to {dest})")
         except Exception as e:
             print(f"    ✗  {e}")
 

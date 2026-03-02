@@ -29,8 +29,8 @@ from ultralytics import YOLO
 
 # ── defaults ──────────────────────────────────────────────────────────────────
 _HERE           = Path(__file__).resolve().parent
-DEFAULT_WEIGHTS = str(_HERE / ".." / "models" / "yolov26nobbnew_merged_1024.pt")
-DEFAULT_SOURCE  = str(_HERE / ".." / "video_test" / "nadir_ped_crossing_crop640.mp4")
+DEFAULT_WEIGHTS = str(_HERE / ".." / "resources" / "models" / "yolov26nobbnew_merged_1024.pt")
+DEFAULT_SOURCE  = str(_HERE / ".." / "resources" / "video_test" / "nadir_ped_crossing_crop640.mp4")
 DEFAULT_DEVICE  = "mps" if torch.backends.mps.is_available() else "cpu"
 
 # colour palette – one per class (cycles if >20 classes)

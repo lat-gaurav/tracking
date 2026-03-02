@@ -60,8 +60,9 @@ torch.set_num_threads(1)
 # ── defaults ──────────────────────────────────────────────────────────────────
 _HERE           = Path(__file__).resolve().parent
 _EXPERIMENTS    = _PYSOT_ROOT / "experiments"
+_WEIGHTS_ROOT   = _HERE.parent / "resources" / "weights"
 DEFAULT_CONFIG  = "siamrpn_alex_dwxcorr"
-DEFAULT_VIDEO   = str(_HERE.parent / "video_test" / "nadir_ped_crossing_crop640.mp4")
+DEFAULT_VIDEO   = str(_HERE.parent / "resources" / "video_test" / "nadir_ped_crossing_crop640.mp4")
 DEFAULT_DEVICE  = "cpu"   # pysot runs on cpu/cuda (MPS not fully supported)
 
 TRACK_COLOR  = (0, 255,   0)   # green  – track box
@@ -98,7 +99,7 @@ def load_tracker(config_name: str, weights_path: str, device: str):
         sys.exit(1)
 
     if not weights_path:
-        weights_path = str(_EXPERIMENTS / config_name / "model" / "model.pth")
+        weights_path = str(_WEIGHTS_ROOT / config_name / "model" / "model.pth")
     if not Path(weights_path).exists():
         print(f"\nERROR: Model weights not found at:\n  {weights_path}", file=sys.stderr)
         print("""

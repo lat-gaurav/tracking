@@ -64,9 +64,10 @@ torch.set_num_threads(1)
 # ── paths / constants ─────────────────────────────────────────────────────────
 _HERE        = Path(__file__).resolve().parent
 _EXPERIMENTS = _PYSOT_ROOT / "experiments"
-DEFAULT_VIDEO  = str(_HERE.parent / "video_test" / "nadir_ped_crossing_crop640.mp4")
+_WEIGHTS_ROOT  = _HERE.parent / "resources" / "weights"
+DEFAULT_VIDEO  = str(_HERE.parent / "resources" / "video_test" / "nadir_ped_crossing_crop640.mp4")
 DEFAULT_CONFIG = "siamrpn_alex_dwxcorr"
-DEFAULT_YOLO   = str(_HERE.parent / "models" / "yolov26nobbnew_merged_1024.pt")
+DEFAULT_YOLO   = str(_HERE.parent / "resources" / "models" / "yolov26nobbnew_merged_1024.pt")
 DEFAULT_DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 
 COL_ANCHOR  = (  0, 255,   0)   # green  – anchor template winning
@@ -212,7 +213,7 @@ def load_siam(config_name, weights_path):
         print(f"ERROR: pysot config not found: {cfg_file}\n  Available: {avail}", file=sys.stderr)
         sys.exit(1)
     if not weights_path:
-        weights_path = str(_EXPERIMENTS / config_name / "model" / "model.pth")
+        weights_path = str(_WEIGHTS_ROOT / config_name / "model" / "model.pth")
     if not Path(weights_path).exists():
         print(f"""
 ERROR: SiamRPN weights not found at:

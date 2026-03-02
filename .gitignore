@@ -1,11 +1,12 @@
-# ── Videos ────────────────────────────────────────────────────────────────────
+# ── All downloadable assets (videos, weights, recordings) ─────────────────────
+resources/
+
+# ── Stray binary files (safety net outside resources/) ────────────────────────
 *.mp4
 *.avi
 *.mov
 *.mkv
 *.yuy2
-
-# ── Model weights / engines ────────────────────────────────────────────────────
 *.pt
 *.pth
 *.engine

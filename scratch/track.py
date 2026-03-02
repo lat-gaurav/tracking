@@ -25,11 +25,11 @@ except ImportError:
     raise SystemExit(1)
 
 # ── defaults ─────────────────────────────────────────────────────────────────
-DEFAULT_WEIGHTS = str(Path(__file__).resolve().parent.parent / "models" / "yolov26nobbnew_merged_1024.pt")  # auto-downloaded by ultralytics if absent
+_HERE           = Path(__file__).resolve().parent
+DEFAULT_WEIGHTS = str(_HERE.parent / "resources" / "models" / "yolov26nobbnew_merged_1024.pt")
 DEFAULT_REID    = "mobilenet"            # DeepSORT built-in embedder (no extra file needed)
 DEFAULT_DEVICE  = "mps" if torch.backends.mps.is_available() else "cpu"
-_HERE           = Path(__file__).resolve().parent
-DEFAULT_SOURCE  = str(_HERE / ".." / "video_test" / "13657722_640x640.mp4")
+DEFAULT_SOURCE  = str(_HERE / ".." / "resources" / "video_test" / "13657722_640x640.mp4")
 
 
 def parse_args() -> argparse.Namespace:

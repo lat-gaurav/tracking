@@ -36,8 +36,8 @@ except ImportError:
 
 # ── defaults ──────────────────────────────────────────────────────────────────
 _HERE          = Path(__file__).resolve().parent
-DEFAULT_WEIGHTS = str(_HERE / ".." / "models" / "yolov26nobbnew_merged_1024.pt")
-DEFAULT_SOURCE  = str(_HERE / ".." / "video_test" / "nadir_crosswalk_ped.mp4")
+DEFAULT_WEIGHTS = str(_HERE / ".." / "resources" / "models" / "yolov26nobbnew_merged_1024.pt")
+DEFAULT_SOURCE  = str(_HERE / ".." / "resources" / "video_test" / "nadir_crosswalk_ped.mp4")
 DEFAULT_DEVICE  = "mps" if torch.backends.mps.is_available() else "cpu"
 TRAIL_LEN       = 60          # number of past centre-points to draw as trail
 LOST_PATIENCE   = 45          # frames to wait after a track disappears before showing "Lost"
