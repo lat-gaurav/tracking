@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout siam_track.py siam_track_drift_correct.py)",
+      "Bash(python3 -c \"import os; print\\('CPU cores \\(logical\\):', os.cpu_count\\(\\)\\)\" 2>/dev/null; nproc; lscpu | grep -E \"^CPU\\\\\\(s\\\\\\)|Thread|Core|Model name\")",
+      "Bash(python3 -c \"import py_compile; py_compile.compile\\('siam_seg_anchor.py', doraise=True\\)\" 2>&1)",
+      "Bash(python3 -c \"\nlines = open\\('siam_seg_anchor.py'\\).readlines\\(\\)\nout = []\nfor i, line in enumerate\\(lines\\):\n    n = i + 1  # 1-indexed line number\n    if 595 <= n <= 599:\n        # Replace old header with new one\n        if n == 595:\n            out.append\\('# ══════════════════════════════════════════════════════════════════════════════\\\\n'\\)\n            out.append\\('# ORIGINAL main\\(\\) – commented out.\\\\n'\\)\n            out.append\\('# To revert: uncomment this block and comment out the new main\\(\\) below.\\\\n'\\)\n            out.append\\('# ══════════════════════════════════════════════════════════════════════════════\\\\n'\\)\n        # skip original header lines 596-599\n        continue\n    elif 601 <= n <= 1052:\n        # Comment out the old main body\n        # Also change _main_original back to main so uncommenting just works\n        text = line.replace\\('def _main_original\\(\\):', 'def main\\(\\):'\\)\n        if text.strip\\(\\):\n            out.append\\('# ' + text\\)\n        else:\n            out.append\\('#\\\\n'\\)\n    else:\n        out.append\\(line\\)\nopen\\('siam_seg_anchor.py', 'w'\\).writelines\\(out\\)\nprint\\('Done – lines 601-1052 commented out'\\)\n\")",
+      "Bash(python3 -c \"import py_compile; py_compile.compile\\('siam_seg_anchor.py', doraise=True\\); print\\('Syntax OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('siam_seg_anchor.py'\\).read\\(\\)\\); print\\('Syntax OK'\\)\")",
+      "Bash(python3 -c \"\nimport ast\nsource = open\\('siam_seg_anchor.py'\\).read\\(\\)\ntree = ast.parse\\(source\\)\n\n# Count functions and check for main\nfuncs = [n.name for n in ast.walk\\(tree\\) if isinstance\\(n, \\(ast.FunctionDef, ast.AsyncFunctionDef\\)\\)]\nclasses = [n.name for n in ast.walk\\(tree\\) if isinstance\\(n, ast.ClassDef\\)]\nprint\\(f'Syntax OK'\\)\nprint\\(f'Functions: {len\\(funcs\\)}'\\)\nprint\\(f'Classes: {classes}'\\)\nprint\\(f'Has main\\(\\): {\\\\\"main\\\\\" in funcs}'\\)\n\n# Count lines\nlines = source.count\\('\\\\n'\\) + 1\nprint\\(f'Total lines: {lines}'\\)\n\")",
+      "WebSearch",
+      "Bash(grep -l \"torchreid\\\\|OSNet\" /mnt/c/Users/AmitSingh/Desktop/PnA/tracking/siamese/*.py 2>/dev/null)",
+      "Bash(ls -la /mnt/c/Users/AmitSingh/Desktop/PnA/tracking/resources/models/reid/ 2>/dev/null; ls -la /mnt/c/Users/AmitSingh/Desktop/PnA/resources/models/reid/ 2>/dev/null; find /mnt/c/Users/AmitSingh/Desktop/PnA -name \"*.pt\" -path \"*/reid/*\" 2>/dev/null | head -20)",
+      "Bash(python3 -m py_compile siam_seg_anchor.py 2>&1)",
+      "Read(//mnt/c/Users/AmitSingh/Desktop/PnA/tracking/resources/video_test/**)",
+      "Bash(python3 -m py_compile siam_seg_anchor.py && echo \"OK\")",
+      "Read(//mnt/c/Users/AmitSingh/Desktop/PnA/tracking/**)",
+      "Bash(python3 -c \":*)",
+      "Bash(which ffprobe 2>&1 && ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,duration -of csv=p=0 /mnt/c/Users/AmitSingh/Desktop/PnA/tracking/resources/recordings/1.mp4 2>&1)",
+      "Bash(ls -lhS /mnt/c/Users/AmitSingh/Desktop/PnA/tracking/resources/recordings/*.mp4 2>&1)",
+      "Bash(echo $DISPLAY)",
+      "Bash(python3 -c \"import cv2; cv2.namedWindow\\('test', cv2.WINDOW_NORMAL\\); cv2.destroyAllWindows\\(\\); print\\('GUI works'\\)\" 2>&1)",
+      "Bash(python3 -c \"import torch; print\\('torch:', torch.__version__, 'cuda:', torch.cuda.is_available\\(\\)\\); import cv2; print\\('cv2:', cv2.__version__\\)\" 2>&1)",
+      "Bash(python3 -c \"from ultralytics import YOLO; print\\('ultralytics OK'\\)\" 2>&1)",
+      "Bash(python3 test_headless.py 2>&1)",
+      "Bash(python3 -c \"\nimport cv2\ncap = cv2.VideoCapture\\('/tmp/track_test_output.mp4'\\)\nfor f in [0, 50, 100, 150, 200, 250, 299]:\n    cap.set\\(cv2.CAP_PROP_POS_FRAMES, f\\)\n    ok, frame = cap.read\\(\\)\n    if ok:\n        cv2.imwrite\\(f'/tmp/track_f{f:03d}.jpg', frame\\)\ncap.release\\(\\)\nprint\\('Saved sample frames'\\)\n\" 2>&1)",
+      "Bash(ls /tmp/first_nadir*)",
+      "Bash(python3 -c \"\nimport cv2\ncap = cv2.VideoCapture\\('/tmp/track_test_output.mp4'\\)\nfor f in [0, 100, 280, 310, 320, 330, 340, 360, 400]:\n    cap.set\\(cv2.CAP_PROP_POS_FRAMES, f\\)\n    ok, frame = cap.read\\(\\)\n    if ok:\n        cv2.imwrite\\(f'/tmp/ped_f{f:03d}.jpg', frame\\)\ncap.release\\(\\)\nprint\\('Done'\\)\n\" 2>&1)",
+      "Bash(python3 -c \"\nimport cv2\ncap = cv2.VideoCapture\\('/tmp/track_test_output.mp4'\\)\nfor f in [0, 120, 160, 180, 240, 300, 380]:\n    cap.set\\(cv2.CAP_PROP_POS_FRAMES, f\\)\n    ok, frame = cap.read\\(\\)\n    if ok:\n        cv2.imwrite\\(f'/tmp/ped2_f{f:03d}.jpg', frame\\)\ncap.release\\(\\)\n\" 2>&1)",
+      "Bash(python3 -c \"\nimport cv2\ncap = cv2.VideoCapture\\('/tmp/track_test_output.mp4'\\)\nfor f in [0, 140, 240, 400]:\n    cap.set\\(cv2.CAP_PROP_POS_FRAMES, f\\)\n    ok, frame = cap.read\\(\\)\n    if ok:\n        cv2.imwrite\\(f'/tmp/ped3_f{f:03d}.jpg', frame\\)\ncap.release\\(\\)\n\" 2>&1)",
+      "Bash(python3 -c \"import torch; print\\('CUDA available:', torch.cuda.is_available\\(\\)\\); print\\('Device count:', torch.cuda.device_count\\(\\)\\); print\\('Device name:', torch.cuda.get_device_name\\(0\\) if torch.cuda.is_available\\(\\) else 'N/A'\\)\")",
+      "Bash(grep -l \"MultiCueGate\" /home/amit/.claude/projects/-mnt-c-Users-AmitSingh-Desktop-PnA-tracking-siamese/*.jsonl 2>/dev/null)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('siam_seg_anchor.py'\\).read\\(\\)\\); print\\('Syntax OK'\\)\")"
+    ]
+  }
+}
